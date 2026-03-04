@@ -41,9 +41,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lai3d/qfc-sdk-python"
+Homepage = "https://github.com/qfc-network/qfc-sdk-python"
 Documentation = "https://docs.qfc.network/sdk/python"
-Repository = "https://github.com/lai3d/qfc-sdk-python"
+Repository = "https://github.com/qfc-network/qfc-sdk-python"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/qfc_sdk"]
