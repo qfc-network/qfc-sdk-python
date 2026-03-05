@@ -5,6 +5,14 @@ from qfc_sdk.types.block import Block
 from qfc_sdk.types.transaction import Transaction, TransactionReceipt, TransactionRequest
 from qfc_sdk.types.validator import Validator, StakeInfo, Delegation, ContributionScore
 from qfc_sdk.types.account import Account
+from qfc_sdk.types.inference import (
+    InferenceModel,
+    InferenceStats,
+    ComputeInfo,
+    InferenceTask,
+    InferenceProofResult,
+    PublicTaskResult,
+)
 
 __all__ = [
     "Network",
@@ -18,4 +26,10 @@ __all__ = [
     "Delegation",
     "ContributionScore",
     "Account",
+    "InferenceModel",
+    "InferenceStats",
+    "ComputeInfo",
+    "InferenceTask",
+    "InferenceProofResult",
+    "PublicTaskResult",
 ]

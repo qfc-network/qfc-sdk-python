@@ -24,6 +24,12 @@ from qfc_sdk.types import (
     Validator,
     StakeInfo,
     Delegation,
+    InferenceModel,
+    InferenceStats,
+    ComputeInfo,
+    InferenceTask,
+    InferenceProofResult,
+    PublicTaskResult,
 )
 from qfc_sdk.constants import NETWORKS, CONTRACTS, MIN_STAKE, MIN_DELEGATION, UNSTAKE_DELAY
 
@@ -60,6 +66,12 @@ __all__ = [
     "Validator",
     "StakeInfo",
     "Delegation",
+    "InferenceModel",
+    "InferenceStats",
+    "ComputeInfo",
+    "InferenceTask",
+    "InferenceProofResult",
+    "PublicTaskResult",
     # Constants
     "NETWORKS",
     "CONTRACTS",

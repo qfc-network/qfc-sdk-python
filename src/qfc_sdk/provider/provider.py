@@ -4,7 +4,11 @@ from typing import Any
 from web3 import Web3
 from web3.types import BlockIdentifier, TxParams
 
-from qfc_sdk.types import Block, Transaction, TransactionReceipt, Validator, ContributionScore
+from qfc_sdk.types import (
+    Block, Transaction, TransactionReceipt, Validator, ContributionScore,
+    InferenceStats, ComputeInfo, InferenceModel, InferenceTask,
+    InferenceProofResult, PublicTaskResult,
+)
 from qfc_sdk.constants import NETWORKS
 
 
@@ -354,6 +358,126 @@ class QfcProvider:
             Network statistics including TPS, block time, etc.
         """
         return self._rpc_call("qfc_getNetworkStats", [])
+
+    # v2.0: AI Inference methods
+
+    def get_inference_stats(self) -> InferenceStats:
+        """Get network-wide inference statistics."""
+        result = self._rpc_call("qfc_getInferenceStats", [])
+        return InferenceStats(
+            tasks_completed=int(result["tasksCompleted"]),
+            avg_time_ms=float(result["avgTimeMs"]),
+            flops_total=int(result["flopsTotal"]),
+            pass_rate=float(result["passRate"]),
+        )
+
+    def get_compute_info(self) -> ComputeInfo:
+        """Get this node's compute capability information."""
+        result = self._rpc_call("qfc_getComputeInfo", [])
+        return ComputeInfo(
+            backend=result["backend"],
+            supported_models=result.get("supportedModels", []),
+            gpu_memory_mb=result.get("gpuMemoryMb", 0),
+            inference_score=int(result.get("inferenceScore", "0"), 16) if isinstance(result.get("inferenceScore"), str) else result.get("inferenceScore", 0),
+            gpu_tier=result.get("gpuTier", "Cold"),
+            provides_compute=result.get("providesCompute", False),
+        )
+
+    def get_supported_models(self) -> list[InferenceModel]:
+        """Get list of approved inference models."""
+        result = self._rpc_call("qfc_getSupportedModels", [])
+        return [
+            InferenceModel(
+                name=m["name"],
+                version=m["version"],
+                min_memory_mb=m["minMemoryMb"],
+                min_tier=m["minTier"],
+                approved=m.get("approved", True),
+            )
+            for m in result
+        ]
+
+    def get_inference_task(
+        self,
+        miner_address: str,
+        gpu_tier: str,
+        available_memory_mb: int,
+        backend: str,
+    ) -> InferenceTask | None:
+        """Request an inference task for a miner."""
+        result = self._rpc_call("qfc_getInferenceTask", [{
+            "minerAddress": miner_address,
+            "gpuTier": gpu_tier,
+            "availableMemoryMb": available_memory_mb,
+            "backend": backend,
+        }])
+        if result is None:
+            return None
+        return InferenceTask(
+            task_id=result["taskId"],
+            epoch=result["epoch"],
+            task_type=result["taskType"],
+            model_name=result["modelName"],
+            model_version=result["modelVersion"],
+            input_data=result["inputData"],
+            deadline=result["deadline"],
+        )
+
+    def submit_inference_proof(
+        self,
+        miner_address: str,
+        task_id: str,
+        epoch: int,
+        output_hash: str,
+        execution_time_ms: int,
+        flops_estimated: int,
+        backend: str,
+        proof_bytes: str,
+    ) -> InferenceProofResult:
+        """Submit an inference proof."""
+        result = self._rpc_call("qfc_submitInferenceProof", [{
+            "minerAddress": miner_address,
+            "taskId": task_id,
+            "epoch": epoch,
+            "outputHash": output_hash,
+            "executionTimeMs": execution_time_ms,
+            "flopsEstimated": flops_estimated,
+            "backend": backend,
+            "proofBytes": proof_bytes,
+        }])
+        return InferenceProofResult(
+            accepted=result["accepted"],
+            spot_checked=result.get("spotChecked", False),
+            message=result.get("message", ""),
+        )
+
+    def submit_public_task(
+        self,
+        task_type: str,
+        model_id: str,
+        input_data: str,
+        max_fee: str,
+    ) -> str:
+        """Submit a public inference task. Returns task ID."""
+        result = self._rpc_call("qfc_submitPublicTask", [{
+            "taskType": task_type,
+            "modelId": model_id,
+            "inputData": input_data,
+            "maxFee": max_fee,
+        }])
+        return str(result)
+
+    def get_public_task_status(self, task_id: str) -> PublicTaskResult:
+        """Get status of a public inference task."""
+        result = self._rpc_call("qfc_getPublicTaskStatus", [task_id])
+        return PublicTaskResult(
+            task_id=result["taskId"],
+            status=result["status"],
+            result_data=result.get("resultData"),
+            miner_address=result.get("minerAddress"),
+            execution_time_ms=result.get("executionTimeMs"),
+            fee=int(result["fee"]) if result.get("fee") is not None else None,
+        )
 
     def _rpc_call(self, method: str, params: list[Any]) -> Any:
         """Make a raw JSON-RPC call.
