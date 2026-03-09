@@ -3,6 +3,7 @@
 from qfc_sdk.provider import QfcProvider
 from qfc_sdk.wallet import QfcWallet
 from qfc_sdk.staking import StakingClient
+from qfc_sdk.inference import InferenceClient
 from qfc_sdk.contracts import get_erc20, get_erc721, get_erc1155, get_multicall3
 from qfc_sdk.utils import (
     parse_qfc,
@@ -42,6 +43,8 @@ __all__ = [
     "QfcWallet",
     # Staking
     "StakingClient",
+    # Inference
+    "InferenceClient",
     # Contracts
     "get_erc20",
     "get_erc721",
